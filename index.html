@@ -436,7 +436,7 @@ var BAITAP={};
    Khoá "publishable" được phép công khai: quyền xem do kho quyết định theo mã vào học. */
 window.KHO=(function(){
   'use strict';
-  var DIA_CHI='https://qbjuzbsmfhwieetlufmf.supabase.co', KHOA='sb_publishable_ydfHfwZOUfGBGB1lc7sZDQ_LVUPuu_5', PHIEN_BAN={"bai/tho-1-hinh-anh-trong-tho.html":"9d4c16d7f7","bai/tho-2-phep-tu-tu.html":"42bfa2020a","bai/tho-3-the-tho-van-nhip.html":"fd1771cb05","bai/tho-4-cam-xuc-cam-hung.html":"2d6dce747b","bai/tho-5-gia-tri-bai-tho.html":"845595d0b3","bai/tho-6-nhan-vat-tru-tinh.html":"b0c5118786","bai/tho-7-tuong-trung-sieu-thuc.html":"d959ff5979","bai/tho-8-chu-de-thong-diep.html":"03e0c7b626","bai/truyen-1-ngoi-ke-diem-nhin.html":"f213be2dcd","bai/truyen-2-phong-cach.html":"2754d71734","bai/truyen-3-thay-doi-diem-nhin.html":"720f6cd40f","bai/truyen-4-chi-tiet-su-kien-nhan-vat.html":"d6fe3d4983","bai/truyen-5-yeu-to-ki-ao.html":"f1a9fa8814","bai/truyen-6-truyen-ngan-hien-dai.html":"828890779d","bai-tap.json":"2f3844fe13","muc-luc.json":"746a0c1a48","video/tho-1-hinh-anh-trong-tho.mp4":"40d10147a0","video/tho-2-phep-tu-tu.mp4":"4fcaa97fd1","video/tho-3-the-tho-van-nhip.mp4":"13597399fc","video/tho-4-cam-xuc-cam-hung.mp4":"b4f55eeb5a","video/tho-5-gia-tri-bai-tho.mp4":"0f8a66c8d9","video/tho-6-nhan-vat-tru-tinh.mp4":"b39ec7f98f","video/tho-7-tuong-trung-sieu-thuc.mp4":"4679f8786f","video/tho-8-chu-de-thong-diep.mp4":"3834201234","video/truyen-1-ngoi-ke-diem-nhin.mp4":"0c29b51fff","video/truyen-2-phong-cach.mp4":"17e8e70c5a","video/truyen-3-thay-doi-diem-nhin.mp4":"c9b7e9ef18","video/truyen-4-chi-tiet-su-kien-nhan-vat.mp4":"4bf31f3378","video/truyen-5-yeu-to-ki-ao.mp4":"8a27640fe9","video/truyen-6-truyen-ngan-hien-dai.mp4":"7d7a10c590"};
+  var DIA_CHI='https://qbjuzbsmfhwieetlufmf.supabase.co', KHOA='sb_publishable_ydfHfwZOUfGBGB1lc7sZDQ_LVUPuu_5', PHIEN_BAN={"bai/tho-1-hinh-anh-trong-tho.html":"9d4c16d7f7","bai/tho-2-phep-tu-tu.html":"42bfa2020a","bai/tho-3-the-tho-van-nhip.html":"fd1771cb05","bai/tho-4-cam-xuc-cam-hung.html":"2d6dce747b","bai/tho-5-gia-tri-bai-tho.html":"845595d0b3","bai/tho-6-nhan-vat-tru-tinh.html":"b0c5118786","bai/tho-7-tuong-trung-sieu-thuc.html":"d959ff5979","bai/tho-8-chu-de-thong-diep.html":"03e0c7b626","bai/truyen-1-ngoi-ke-diem-nhin.html":"f213be2dcd","bai/truyen-2-phong-cach.html":"2754d71734","bai/truyen-3-thay-doi-diem-nhin.html":"720f6cd40f","bai/truyen-4-chi-tiet-su-kien-nhan-vat.html":"d6fe3d4983","bai/truyen-5-yeu-to-ki-ao.html":"f1a9fa8814","bai/truyen-6-truyen-ngan-hien-dai.html":"828890779d","bai-tap.json":"ad3659c7ac","muc-luc.json":"746a0c1a48","video/tho-1-hinh-anh-trong-tho.mp4":"40d10147a0","video/tho-2-phep-tu-tu.mp4":"4fcaa97fd1","video/tho-3-the-tho-van-nhip.mp4":"13597399fc","video/tho-4-cam-xuc-cam-hung.mp4":"b4f55eeb5a","video/tho-5-gia-tri-bai-tho.mp4":"0f8a66c8d9","video/tho-6-nhan-vat-tru-tinh.mp4":"b39ec7f98f","video/tho-7-tuong-trung-sieu-thuc.mp4":"4679f8786f","video/tho-8-chu-de-thong-diep.mp4":"3834201234","video/truyen-1-ngoi-ke-diem-nhin.mp4":"0c29b51fff","video/truyen-2-phong-cach.mp4":"17e8e70c5a","video/truyen-3-thay-doi-diem-nhin.mp4":"c9b7e9ef18","video/truyen-4-chi-tiet-su-kien-nhan-vat.mp4":"4bf31f3378","video/truyen-5-yeu-to-ki-ao.mp4":"8a27640fe9","video/truyen-6-truyen-ngan-hien-dai.mp4":"7d7a10c590"};
   var TEN_PHIEN='dlh-phien', TEN_CHO='dlh-cho-gui', TEN_LUU='dlh-hoc-lieu';
   var TEN_CHO_DIEM='dlh-cho-diem';
   var phien=null, dangLay=null, ma='', dem={}, diaChiVideo=[], diem=null, daTinh={};
@@ -745,11 +745,13 @@ window.KHO=(function(){
     });
   }
   /* Học liệu thật: chỉ tải khi em bấm "Mở bài học"; rời trang thì gỡ ra để tắt tiếng */
-  var baiDangMo=null, henCham=null, theoDoiCao=null, lanTai=0;
+  var baiDangMo=null, henCham=null, theoDoiCao=null, lanTai=0, dangNghe=false;
+  // dangNghe: đang nghe một lượt (lần đầu hoặc nghe lại) thì phần thực hành khoá đến khi nghe xong
+  function datDangNghe(co){dangNghe=co; capNhatKhoa();}
   function dongHocLieu(){
     clearTimeout(henCham); if(theoDoiCao){theoDoiCao.disconnect(); theoDoiCao=null;}
     lanTai++; if(window.KHO){window.KHO.dong();}
-    baoDiem('');
+    baoDiem(''); dangNghe=false;
     var k=document.getElementById('khung-hl'); k.textContent=''; k.hidden=true;
     document.getElementById('bia-hl').hidden=false; mang.hidden=true;
     var nut=document.getElementById('nut-bat-dau'), hl=(window.HOCLIEU||{})[baiDangMo];
@@ -760,6 +762,7 @@ window.KHO=(function(){
     var hl=(window.HOCLIEU||{})[baiDangMo]; if(!hl)return;
     var k=document.getElementById('khung-hl'), nut=document.getElementById('nut-bat-dau'), ghi=document.getElementById('ghichu-khung');
     k.textContent=''; nut.disabled=true; nut.textContent='Đang tải…'; ghi.textContent='Đợi một chút nhé.';
+    datDangNghe(true);
     var f=document.createElement('iframe');
     f.title='Bài học: '+baiDangMo; f.setAttribute('allow','autoplay; fullscreen'); f.setAttribute('allowfullscreen','');
     f.className='dang-tai';
@@ -769,6 +772,7 @@ window.KHO=(function(){
         if(d.URL==='about:blank')return;
         clearTimeout(henCham); mang.hidden=true; k.textContent=''; k.hidden=true;
         nut.disabled=false; nut.textContent='Thử lại'; ghi.textContent='Chưa tải được bài học. Kiểm tra mạng rồi bấm Thử lại.';
+        datDangNghe(false);
         return;
       }
       clearTimeout(henCham); mang.hidden=true;
@@ -778,6 +782,10 @@ window.KHO=(function(){
       var xong=d.getElementById('done'), tenBai=baiDangMo;
       if(window.KHO){window.KHO.ghi(tenBai,'mo_bai');}
       var luot=null, coDiem=!!(window.KHO&&window.KHO.diem()), lanBai=lanTai;
+      ['startBtn','againBtn'].forEach(function(id){
+        var n=d.getElementById(id);
+        if(n){n.addEventListener('click',function(){datDangNghe(true);});}
+      });
       if(coDiem){
         ['startBtn','againBtn'].forEach(function(id){
           var n=d.getElementById(id);
@@ -786,6 +794,7 @@ window.KHO=(function(){
       }
       if(xong){new MutationObserver(function(){
         if(xong.hidden)return;
+        dangNghe=false;
         danhDauXong(tenBai);
         if(coDiem){
           // Học liệu ghi sẵn "Câu 1: N lần chọn · ..." ở màn hoàn thành
@@ -815,6 +824,7 @@ window.KHO=(function(){
         clearTimeout(henCham); mang.hidden=true;
         nut.disabled=false; nut.textContent='Thử lại';
         ghi.textContent=e&&e.loai==='khoa'?'Mã không còn mở. Hãy hỏi thầy cô.':'Chưa tải được bài học. Kiểm tra mạng rồi bấm Thử lại.';
+        datDangNghe(false);
       });
     }else{
       f.src=hl.file;
@@ -847,14 +857,14 @@ window.KHO=(function(){
   }
   function capNhatKhoa(){
     var coBai=((window.BAITAP||{})[baiDangMo]||[]).length>0;
-    var khoa=coBai&&!xemXong(baiDangMo);
+    var khoa=coBai&&(dangNghe||!xemXong(baiDangMo));
     document.getElementById('khoa-bt').hidden=!khoa;
     document.getElementById('ds-baitap').hidden=khoa;
   }
   var LOI_DIEM={
     tinh:'★ Đã được cộng điểm cho bài này.',
     da_tinh:'★ Bài này đã được cộng điểm từ trước.',
-    may_phu:'Máy này chỉ để xem, không được cộng điểm. Muốn được cộng, hãy học trên máy đăng nhập đầu tiên.',
+    may_phu:'Lượt xem chưa được cộng điểm do đang sử dụng điện thoại/máy tính khác.',
     nhanh_qua:'Lượt này chưa được cộng điểm vì thời gian học quá ngắn.',
     thieu_cau:'Lượt này chưa được cộng điểm vì chưa trả lời đủ câu hỏi.',
     mat_mang:'Lượt này chưa được cộng điểm vì mất mạng lúc bắt đầu. Bấm “Học lại từ đầu” để được cộng.',
