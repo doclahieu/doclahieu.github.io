@@ -446,7 +446,7 @@ window.KHO=(function(){
   var DIA_CHI='https://qbjuzbsmfhwieetlufmf.supabase.co', KHOA='sb_publishable_ydfHfwZOUfGBGB1lc7sZDQ_LVUPuu_5', PHIEN_BAN={"bai/tho-1-hinh-anh-trong-tho.html":"9d4c16d7f7","bai/tho-2-phep-tu-tu.html":"42bfa2020a","bai/tho-3-the-tho-van-nhip.html":"fd1771cb05","bai/tho-4-cam-xuc-cam-hung.html":"2d6dce747b","bai/tho-5-gia-tri-bai-tho.html":"845595d0b3","bai/tho-6-nhan-vat-tru-tinh.html":"b0c5118786","bai/tho-7-tuong-trung-sieu-thuc.html":"d959ff5979","bai/tho-8-chu-de-thong-diep.html":"03e0c7b626","bai/truyen-1-ngoi-ke-diem-nhin.html":"f213be2dcd","bai/truyen-2-phong-cach.html":"2754d71734","bai/truyen-3-thay-doi-diem-nhin.html":"720f6cd40f","bai/truyen-4-chi-tiet-su-kien-nhan-vat.html":"d6fe3d4983","bai/truyen-5-yeu-to-ki-ao.html":"f1a9fa8814","bai/truyen-6-truyen-ngan-hien-dai.html":"828890779d","bai-tap.json":"ad3659c7ac","muc-luc.json":"746a0c1a48","video/tho-1-hinh-anh-trong-tho.mp4":"40d10147a0","video/tho-2-phep-tu-tu.mp4":"4fcaa97fd1","video/tho-3-the-tho-van-nhip.mp4":"13597399fc","video/tho-4-cam-xuc-cam-hung.mp4":"b4f55eeb5a","video/tho-5-gia-tri-bai-tho.mp4":"0f8a66c8d9","video/tho-6-nhan-vat-tru-tinh.mp4":"b39ec7f98f","video/tho-7-tuong-trung-sieu-thuc.mp4":"4679f8786f","video/tho-8-chu-de-thong-diep.mp4":"3834201234","video/truyen-1-ngoi-ke-diem-nhin.mp4":"0c29b51fff","video/truyen-2-phong-cach.mp4":"17e8e70c5a","video/truyen-3-thay-doi-diem-nhin.mp4":"c9b7e9ef18","video/truyen-4-chi-tiet-su-kien-nhan-vat.mp4":"4bf31f3378","video/truyen-5-yeu-to-ki-ao.mp4":"8a27640fe9","video/truyen-6-truyen-ngan-hien-dai.mp4":"7d7a10c590"};
   var TEN_PHIEN='dlh-phien', TEN_CHO='dlh-cho-gui', TEN_LUU='dlh-hoc-lieu';
   var TEN_CHO_DIEM='dlh-cho-diem';
-  var phien=null, dangLay=null, ma='', dem={}, diaChiVideo=[], diem=null, daTinh={};
+  var phien=null, dangLay=null, ma='', dem={}, diaChiVideo=[], diem=null, daTinh={}, chiTiet={}, daTH={};
 
   function loi(loai){var e=new Error(loai); e.loai=loai; return e;}
   function docLai(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
@@ -559,15 +559,26 @@ window.KHO=(function(){
   }
 
   /* Điểm cộng. Kho chưa bật (chưa chạy diem-cong.sql) thì diem=null, trang chạy như cũ. */
-  function layDiem(){
+  /* moi: kho đã có cách tính 0,25 điểm mỗi lượt. giuCu: tải lại giữa chừng bị lỗi thì giữ số đang có. */
+  function layDiem(giuCu){
     return ham('trang_thai_diem',{p_ma:ma}).then(function(d){
-      diem=d?{mayTinhDiem:!!d.may_tinh_diem}:null; daTinh={};
+      diem=d?{mayTinhDiem:!!d.may_tinh_diem, moi:!!d.chi_tiet, tong:Number(d.tong||0)}:null;
+      daTinh={}; chiTiet={}; daTH={};
       ((d&&d.bai)||[]).forEach(function(b){daTinh[b]=true;});
-    }).catch(function(){diem=null; daTinh={};});
+      ((d&&d.chi_tiet)||[]).forEach(function(x){chiTiet[x.ten]={diem:Number(x.diem),soLuot:Number(x.so_luot)};});
+      ((d&&d.thuc_hanh)||[]).forEach(function(b){daTH[b]=true;});
+    }).catch(function(){if(giuCu!==true){diem=null; daTinh={}; chiTiet={}; daTH={};}});
   }
+  function taiLaiDiem(kq){return diem&&diem.moi?layDiem(true).then(function(){return kq;}):kq;}
   function guiDiem(m){
     return ham('xong_bai',{p_luot:m.luot,p_so_lan:m.soLan}).then(function(kq){
-      if(m.ma===ma&&(kq==='tinh'||kq==='da_tinh')){daTinh[m.bai]=true;}
+      if(m.ma===ma&&(kq==='tinh'||kq==='da_tinh')){daTinh[m.bai]=true; return taiLaiDiem(kq);}
+      return kq;
+    });
+  }
+  function guiThucHanh(m){
+    return ham('ghi_thuc_hanh',{p_ma:m.ma,p_bai:m.bai}).then(function(kq){
+      if(m.ma===ma&&kq==='ok'){daTH[m.bai]=true; return taiLaiDiem(kq);}
       return kq;
     });
   }
@@ -578,7 +589,7 @@ window.KHO=(function(){
     if(!cuaToi.length){return Promise.resolve();}
     ghiLai(TEN_CHO_DIEM,c.filter(function(x){return x.ma!==ma;}));
     return cuaToi.reduce(function(truoc,m){
-      return truoc.then(function(){return guiDiem(m).catch(function(){xepChoDiem(m);});});
+      return truoc.then(function(){return (m.th?guiThucHanh(m):guiDiem(m)).catch(function(){xepChoDiem(m);});});
     },Promise.resolve());
   }
   function xepChoDiem(m){var c=docLai(TEN_CHO_DIEM)||[]; c.push(m); ghiLai(TEN_CHO_DIEM,c.slice(-50));}
@@ -623,6 +634,12 @@ window.KHO=(function(){
     soLan:function(bai){return dem[bai]||0;},
     diem:function(){return diem;},
     daTinh:function(bai){return !!daTinh[bai];},
+    diemBai:function(bai){return chiTiet[bai]||null;},
+    daThucHanh:function(bai){return !!daTH[bai];},
+    thucHanh:function(bai){
+      var m={ma:ma,bai:bai,th:true};
+      return guiThucHanh(m).catch(function(){xepChoDiem(m); return 'cho_gui';});
+    },
     batDau:batDau,
     /* luot: lời hứa từ batDau; soLan: mỗi câu bấm mấy lần. Trả về kết quả để báo cho học sinh */
     xong:function(luot,bai,soLan){
@@ -650,6 +667,9 @@ window.KHO=(function(){
     setTimeout(chinhTenBai,0);
     window.scrollTo(0,0);
   }
+  /* Tên hiển thị khác tên gốc. Tên gốc vẫn dùng để tra học liệu, bài tập và lượt học trong kho. */
+  var TEN_HIEN={'Nhận biết nhân vật trữ tình':'Nhân vật trữ tình'};
+  function tenHien(t){return TEN_HIEN[t]||t;}
   function dung(ul,ds,tien){
     ds.forEach(function(b,i){
       var li=document.createElement('li');
@@ -658,7 +678,7 @@ window.KHO=(function(){
       bt.innerHTML='<span class="stt" aria-hidden="true">'+(i+1)+'</span>'+
         '<span class="noidung"><span class="ten"></span></span>'+
         '<span class="tt">Chưa học</span>';
-      bt.querySelector('.ten').textContent=b[0];
+      bt.querySelector('.ten').textContent=tenHien(b[0]); bt.setAttribute('data-bai',b[0]);
       bt.addEventListener('click',function(){mo(b,bt,i+1);});
       li.appendChild(bt); ul.appendChild(li);
     });
@@ -707,6 +727,18 @@ window.KHO=(function(){
     var ds=(window.BAITAP||{})[tenBai];
     if(!ds||!ds.length){o.appendChild(tao('p','luu-y','Phần thực hành sẽ được thêm sau.'));return;}
     o.appendChild(tao('p','luu-y','Viết câu trả lời rồi bấm “Xem bài giải” để đối chiếu.'));
+    // Điểm cộng: làm đủ mọi câu (viết rồi xem bài giải) thì ghi nhận "đã làm thực hành"; không gửi bài viết đi đâu
+    var dm=coDiemMoi(), cacCau=[], dangGui=false;
+    var baoTH=tao('p','thong-bao-diem'); baoTH.id='thong-bao-th'; baoTH.setAttribute('role','status'); baoTH.hidden=true;
+    if(dm&&window.KHO.daThucHanh(tenBai)){hienBao(baoTH,'ok','★ Đã ghi nhận làm phần thực hành.');}
+    else if(dm&&dm.mayTinhDiem){o.appendChild(tao('p','luu-y','Làm đủ mọi câu và bấm “Xem bài giải” ở từng câu để được tính đủ điểm.'));}
+    function kiemTraThucHanh(){
+      if(!coDiemMoi()||dangGui||window.KHO.daThucHanh(tenBai)||cacCau.some(function(c){return !c.xem;}))return;
+      dangGui=true;
+      window.KHO.thucHanh(tenBai).then(function(kq){
+        dangGui=false; capNhatSoLan(); baoThucHanh(baoTH,kq,tenBai);
+      });
+    }
     var so=0;
     ds.forEach(function(g,n){
       var d=tao('details','ngulieu'); d.open=true;
@@ -743,13 +775,16 @@ window.KHO=(function(){
           var du=t.value.trim().length>=TOI_THIEU;
           nut.disabled=!du&&gi.hidden; goiY.hidden=du||!gi.hidden;
         });
+        var trangThai={xem:false}; cacCau.push(trangThai);
         nut.addEventListener('click',function(){
           gi.hidden=!gi.hidden; nut.textContent=gi.hidden?'Xem bài giải':'Ẩn bài giải';
           nut.setAttribute('aria-expanded',String(!gi.hidden));
+          if(!gi.hidden){trangThai.xem=true; kiemTraThucHanh();}
         });
         k.appendChild(h); k.appendChild(t); k.appendChild(goiY); k.appendChild(nut); k.appendChild(gi); o.appendChild(k);
       });
     });
+    o.appendChild(baoTH);
   }
   /* Học liệu thật: chỉ tải khi em bấm "Mở bài học"; rời trang thì gỡ ra để tắt tiếng */
   var baiDangMo=null, henCham=null, theoDoiCao=null, lanTai=0, dangNghe=false;
@@ -771,7 +806,7 @@ window.KHO=(function(){
     k.textContent=''; nut.disabled=true; nut.textContent='Đang tải…'; ghi.textContent='Đợi một chút nhé.';
     datDangNghe(true);
     var f=document.createElement('iframe');
-    f.title='Bài học: '+baiDangMo; f.setAttribute('allow','autoplay; fullscreen'); f.setAttribute('allowfullscreen','');
+    f.title='Bài học: '+tenHien(baiDangMo); f.setAttribute('allow','autoplay; fullscreen'); f.setAttribute('allowfullscreen','');
     f.className='dang-tai';
     f.addEventListener('load',function(){
       var d=null; try{d=f.contentDocument;}catch(e){}
@@ -808,7 +843,7 @@ window.KHO=(function(){
           var chu=(d.getElementById('doneText')||{}).textContent||'';
           var soLanChon=(chu.match(/\d+(?= lần chọn)/g)||[]).map(Number);
           window.KHO.xong(luot,tenBai,soLanChon).then(function(kq){
-            capNhatSoLan(); if(lanBai===lanTai){baoDiem(kq);}
+            capNhatSoLan(); if(lanBai===lanTai){baoDiem(kq,tenBai);}
           });
         }
       }).observe(xong,{attributes:true,attributeFilter:['hidden']});}
@@ -852,14 +887,17 @@ window.KHO=(function(){
   function xemXong(ten){return soLan(ten)>0;}
   function capNhatSoLan(){
     [].forEach.call(document.querySelectorAll('#man-chu .the'),function(the){
-      var n=soLan(the.querySelector('.ten').textContent), nhan=the.querySelector('.tt');
-      var sao=!!(window.KHO&&window.KHO.daTinh(the.querySelector('.ten').textContent));
-      nhan.textContent=sao?(n?'★ Học '+n+' lần':'★ Đã cộng'):(n?'✓ Học '+n+' lần':'Chưa học');
+      var ten=the.getAttribute('data-bai'), n=soLan(ten), nhan=the.querySelector('.tt');
+      var sao=!!(window.KHO&&window.KHO.daTinh(ten));
+      var b=coDiemMoi()&&window.KHO.diemBai(ten);
+      nhan.textContent=b?'★ '+soVN(b.diem)+'đ'+(n?' · '+n+' lần':''):
+        sao?(n?'★ Học '+n+' lần':'★ Đã cộng'):(n?'✓ Học '+n+' lần':'Chưa học');
       nhan.className=(n||sao)?'tt da':'tt';
     });
     var dm=window.KHO&&window.KHO.diem(), loiChao=document.querySelector('#man-chu .chao p');
     // Máy phụ không nhắc ở Trang chủ (chỉ báo sau khi xem xong bài)
-    loiChao.textContent=dm&&dm.mayTinhDiem?'★ là bài đã được cộng điểm. Chọn một bài nhé!':'Chọn một bài học để bắt đầu nhé!';
+    loiChao.textContent=dm&&dm.moi?'Điểm cộng: '+soVN(dm.tong)+' / 10. Chọn một bài nhé!':
+      dm&&dm.mayTinhDiem?'★ là bài đã được cộng điểm. Chọn một bài nhé!':'Chọn một bài học để bắt đầu nhé!';
   }
   function capNhatKhoa(){
     var coBai=((window.BAITAP||{})[baiDangMo]||[]).length>0;
@@ -877,11 +915,34 @@ window.KHO=(function(){
     cho_gui:'Mạng yếu, kết quả sẽ được gửi ở lần vào học sau.',
     khong_hop_le:'Lượt này chưa được cộng điểm. Hãy vào học lại.'
   };
-  function baoDiem(kq){
-    var o=document.getElementById('thong-bao-diem');
-    o.textContent=kq?(LOI_DIEM[kq]||LOI_DIEM.khong_hop_le):'';
-    o.className='thong-bao-diem'+(kq==='tinh'||kq==='da_tinh'?' duoc':'');
-    o.hidden=!kq;
+  /* Cách tính mới: mỗi lượt xem 0,25 điểm, tối đa 0,5 mỗi bài; bài có thực hành mà chưa làm thì tối đa 0,25 */
+  function coDiemMoi(){var d=window.KHO&&window.KHO.diem(); return d&&d.moi?d:null;}
+  function soVN(x){return String(x).replace('.',',');}
+  function conThieu(ten){
+    var b=window.KHO.diemBai(ten), viec=[];
+    if(b&&b.diem>=0.5)return '';
+    if(!b||b.soLuot<2){viec.push(b?'xem thêm 1 lần':'xem 2 lần');}
+    if(((window.BAITAP||{})[ten]||[]).length&&!window.KHO.daThucHanh(ten)){viec.push('làm phần thực hành');}
+    return viec.length?' Để được 0,5 điểm: '+viec.join(' và ')+'.':'';
+  }
+  function diemCuaBai(ten){var b=window.KHO.diemBai(ten); return b?' Điểm bài này: '+soVN(b.diem)+'.':'';}
+  function hienBao(o,kq,chu){
+    o.textContent=chu;
+    o.className='thong-bao-diem'+(kq==='ok'||kq==='tinh'||kq==='da_tinh'?' duoc':'');
+    o.hidden=!chu;
+  }
+  function baoThucHanh(o,kq,ten){
+    hienBao(o,kq,
+      kq==='ok'?'★ Đã ghi nhận làm phần thực hành.'+diemCuaBai(ten)+conThieu(ten):
+      kq==='may_phu'?'Lượt làm chưa được cộng điểm do đang sử dụng điện thoại/máy tính khác.':
+      kq==='cho_gui'?LOI_DIEM.cho_gui:'Chưa ghi nhận được. Hãy vào học lại.');
+  }
+  function baoDiem(kq,ten){
+    var chu=kq?(LOI_DIEM[kq]||LOI_DIEM.khong_hop_le):'';
+    if(coDiemMoi()&&(kq==='tinh'||kq==='da_tinh')){
+      chu=(kq==='tinh'?'★ Đã tính lượt xem này.':'★ Bài này đã tính đủ 2 lượt xem.')+diemCuaBai(ten)+conThieu(ten);
+    }
+    hienBao(document.getElementById('thong-bao-diem'),kq,chu);
   }
   function danhDauXong(ten){
     // Mỗi lần video chạy tới màn "đã hoàn thành" tính là một lần học
@@ -909,7 +970,7 @@ window.KHO=(function(){
   if(document.fonts){document.fonts.ready.then(chinhTenBai); document.fonts.addEventListener('loadingdone',chinhTenBai);}
   function mo(b,bt,so){
     lastBtn=bt||null;
-    document.getElementById('ten-bai').textContent=(so?'Bài '+so+'. ':'')+b[0];
+    document.getElementById('ten-bai').textContent=(so?'Bài '+so+'. ':'')+tenHien(b[0]);
     veBaiTap(b[0]);
     baiDangMo=b[0]; dongHocLieu(); capNhatKhoa();
     hien('hoc');
