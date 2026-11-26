@@ -240,9 +240,17 @@ footer .btn-phu{margin-top:8px; font-size:14px}
 
 /* Web (bố cục ngang, cỡ chuẩn 1366x768, 1920x1080): tên bên trái, nhập mã bên phải */
 @media (min-width:900px){
+  /* Trang học: luôn chừa chỗ cho thanh cuộn của trang, để bề ngang khung bài học không nhảy qua lại */
+  html:has(#man-hoc:not([hidden])){scrollbar-gutter:stable}
   #man-hoc .wrap{max-width:1120px}
   .hoc{grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); grid-template-areas:"mh bt"; column-gap:36px; padding-top:28px}
   .hoc .cot-video{position:sticky; top:16px; align-self:start; max-height:calc(100vh - 32px); overflow:auto}
+  /* Màn hình thấp: thu hẹp khung bài học để tên bài, video, nút và thông báo điểm vừa một màn, không phải cuộn */
+  .hoc .khung-hl{width:100%; max-width:max(480px, calc((100vh - 290px) * 16 / 9)); margin-inline:auto}
+  @media (max-height:640px){
+    .hoc h2{font-size:22px; margin-bottom:8px}
+    .hoc .khung-hl{max-width:max(480px, calc((100vh - 322px) * 16 / 9))}
+  }
   .hoc .baitap{margin-top:0; align-self:start}
   .hoc h2{font-size:30px}
   #man-vao .wrap{max-width:1120px}
@@ -808,7 +816,8 @@ window.KHO=(function(){
       // Cho học liệu khớp với trang: nền sáng, bỏ lề và tiêu đề lặp, khung tự cao theo nội dung
       d.documentElement.setAttribute('data-theme','light');
       var st=d.createElement('style');
-      st.textContent='html,body{margin:0!important;background:transparent!important}body{padding:0 0 4px!important}.wrap{max-width:100%!important}header h1{display:none}';
+      // Khung đã tự cao theo nội dung nên tắt thanh cuộn bên trong (nếu không, thanh cuộn hiện lúc đầu sẽ kẹt lại)
+      st.textContent='html{overflow:hidden!important}html,body{margin:0!important;background:transparent!important}body{padding:0 0 4px!important}.wrap{max-width:100%!important}header h1{display:none}';
       d.head.appendChild(st);
       var chinh=function(){f.style.height=Math.ceil(d.body.getBoundingClientRect().height)+2+'px';};
       chinh();
