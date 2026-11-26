@@ -346,7 +346,6 @@ footer .btn-phu{margin-top:8px; font-size:14px}
 /* Điểm cộng */
 .thong-bao-diem{margin:10px 0 0; padding:10px 14px; border-radius:6px; border:1.5px solid #B7791F; background:#FFF6E0; color:#6B4A0F; font-weight:600; font-size:15px; text-align:center}
 .thong-bao-diem.duoc{border-color:#2F7D4F; background:#E7F5EC; color:#1F5A38}
-#man-chu .chao p.may-phu{color:#8A5A0A; font-weight:600}
 
 </style>
 </head>
@@ -859,10 +858,8 @@ window.KHO=(function(){
       nhan.className=(n||sao)?'tt da':'tt';
     });
     var dm=window.KHO&&window.KHO.diem(), loiChao=document.querySelector('#man-chu .chao p');
-    if(dm){
-      loiChao.textContent=dm.mayTinhDiem?'★ là bài đã được cộng điểm. Chọn một bài nhé!':'Máy này chỉ để xem, không được cộng điểm.';
-      loiChao.classList.toggle('may-phu',!dm.mayTinhDiem);
-    }
+    // Máy phụ không nhắc ở Trang chủ (chỉ báo sau khi xem xong bài)
+    loiChao.textContent=dm&&dm.mayTinhDiem?'★ là bài đã được cộng điểm. Chọn một bài nhé!':'Chọn một bài học để bắt đầu nhé!';
   }
   function capNhatKhoa(){
     var coBai=((window.BAITAP||{})[baiDangMo]||[]).length>0;
